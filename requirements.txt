@@ -3,5 +3,5 @@ pandas
 numpy
 requests
 scikit-learn
-scipy
+xgboost
 matplotlib
