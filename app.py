@@ -265,14 +265,14 @@ class EPLPredictor:
 # ============================================
 
 @st.cache_resource
-def load_app():
+def load_app_v2():
     eng = EPLPredictor()
     if eng.fetch_data():
         eng.run_training_cycle()
         return eng
     return None
 
-engine = load_app()
+engine = load_app_v2()
 
 if not engine:
     st.error("Could not load data. Please check internet connection.")
@@ -382,3 +382,4 @@ with st.expander("VIEW LIVE LEAGUE STANDINGS"):
     elo_data = elo_data.sort_values('Rating', ascending=False).reset_index(drop=True)
     elo_data.index += 1
     st.dataframe(elo_data, use_container_width=True)
+
