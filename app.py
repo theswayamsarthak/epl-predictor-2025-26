@@ -12,13 +12,13 @@ from sklearn.preprocessing import StandardScaler
 # 1. APP CONFIGURATION
 # ============================================
 st.set_page_config(
-    page_title="FC26 GOD MODE",
-    page_icon="🧠",
+    page_title="ENGLISH PREMIER LEAGUE PREDICTOR",
+    page_icon="🔥",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
-# --- LOGO DATABASE ---
+# --- LOGO DATABASE (FotMob High-Res) ---
 TEAM_LOGOS = {
     "Arsenal": "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png",
     "Aston Villa": "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png",
@@ -51,40 +51,119 @@ def get_logo(team_name):
     return TEAM_LOGOS.get(team_name, "https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg")
 
 # ============================================
-# 2. CSS STYLING (FC26 THEME)
+# 2. HIGH-VOLTAGE CSS THEME
 # ============================================
 st.markdown("""
     <style>
+    /* IMPORT GAMING FONT */
     @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700;800&display=swap');
-    :root { --neon-green: #32f99a; --neon-pink: #ff0055; --dark-bg: #0e0e10; }
-    
-    .stApp { background-color: var(--dark-bg); color: white; font-family: 'Rajdhani', sans-serif; }
-    h1, h2, h3 { font-family: 'Rajdhani', sans-serif !important; text-transform: uppercase; font-weight: 800; }
-    
-    /* DROPDOWNS */
-    div[data-baseweb="select"] > div { background-color: #1a1a1d !important; color: white !important; border: 1px solid #333; }
-    div[data-baseweb="select"] span { color: white !important; }
-    
-    /* INPUTS */
-    div[data-baseweb="input"] > div { background-color: #1a1a1d !important; color: white !important; border: 1px solid #333; }
-    input { color: white !important; }
 
-    /* LOGO & ALIGNMENT */
-    .team-col { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-    .team-logo { height: 140px; margin: 15px 0; filter: drop-shadow(0 0 10px rgba(255,255,255,0.2)); }
-    
-    /* BUTTONS */
-    div.stButton > button {
-        background: var(--neon-green); color: black; border: none;
-        clip-path: polygon(5% 0%, 100% 0%, 100% 90%, 95% 100%, 0% 100%, 0% 10%);
-        padding: 15px 30px; font-weight: 800; font-size: 20px; width: 100%;
-        transition: 0.3s;
+    :root {
+        --neon-green: #39ff14;
+        --neon-blue: #00f3ff;
+        --neon-pink: #ff0055;
+        --dark-bg: #0b0c10;
+        --card-bg: rgba(31, 40, 51, 0.8);
     }
-    div.stButton > button:hover { background: white; box-shadow: 0 0 20px var(--neon-green); }
 
-    /* METRICS */
-    div[data-testid="stMetric"] { background: #1a1a1d; border-left: 4px solid var(--neon-green); padding: 10px; }
-    div[data-testid="stMetricValue"] { color: var(--neon-green) !important; font-size: 24px !important; }
+    /* GLOBAL STYLES */
+    .stApp {
+        background-color: var(--dark-bg);
+        background-image: radial-gradient(circle at center top, #1f2833 0%, #0b0c10 70%);
+        color: white;
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    h1, h2, h3 {
+        font-family: 'Rajdhani', sans-serif !important;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+    }
+
+    /* CUSTOM DROPDOWNS (DARK MODE) */
+    div[data-baseweb="select"] > div {
+        background-color: #1f2833 !important;
+        color: white !important;
+        border: 2px solid #45a29e;
+        border-radius: 0px; /* Sharp Edges */
+    }
+    div[data-baseweb="select"] span {
+        color: white !important;
+        font-weight: 700;
+        font-size: 1.2rem;
+    }
+    div[data-baseweb="menu"] {
+        background-color: #0b0c10 !important;
+        border: 1px solid var(--neon-blue);
+    }
+
+    /* INPUT FIELDS (ODDS) */
+    div[data-baseweb="input"] > div {
+        background-color: #1f2833 !important;
+        color: white !important;
+        border: 1px solid #66fcf1;
+    }
+    input { color: white !important; font-weight: bold; }
+
+    /* ANGLED BUTTONS (CYBERPUNK STYLE) */
+    div.stButton > button {
+        background: linear-gradient(45deg, var(--neon-blue), #45a29e);
+        color: black;
+        border: none;
+        clip-path: polygon(10% 0%, 100% 0%, 100% 80%, 90% 100%, 0% 100%, 0% 20%);
+        padding: 15px 0;
+        font-weight: 900;
+        font-size: 22px;
+        text-transform: uppercase;
+        width: 100%;
+        transition: all 0.3s;
+        box-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
+    }
+    div.stButton > button:hover {
+        background: white;
+        transform: scale(1.02);
+        box-shadow: 0 0 30px var(--neon-blue);
+    }
+
+    /* GLASSMORPHISM CARDS */
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    /* METRICS OVERRIDE */
+    div[data-testid="stMetric"] {
+        background-color: #1f2833;
+        border-left: 5px solid var(--neon-green);
+        padding: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    div[data-testid="stMetricValue"] {
+        color: var(--neon-green) !important;
+        font-size: 2rem !important;
+        text-shadow: 0 0 10px var(--neon-green);
+    }
+    div[data-testid="stMetricLabel"] { color: #ccc !important; }
+
+    /* LAYOUT HELPERS */
+    .team-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    .logo-img {
+        height: 150px;
+        filter: drop-shadow(0 0 20px rgba(102, 252, 241, 0.2));
+        transition: transform 0.3s;
+    }
+    .logo-img:hover { transform: scale(1.1); }
     
     #MainMenu, footer, header {visibility: hidden;}
     </style>
@@ -105,7 +184,6 @@ class GodModeEngine:
         self.current_teams = []
 
     def load_data(self):
-        # 1. FETCH REMOTE DATA
         dfs = []
         for s in self.SEASONS:
             try:
@@ -118,7 +196,6 @@ class GodModeEngine:
                     teams = pd.concat([df['HomeTeam'], df['AwayTeam']]).dropna().unique()
                     self.current_teams = sorted(teams)
                 
-                # Select only needed cols
                 cols = ['Date','HomeTeam','AwayTeam','FTHG','FTAG','HS','AS','HST','AST','HC','AC']
                 df = df[[c for c in cols if c in df.columns]]
                 dfs.append(df)
@@ -127,8 +204,6 @@ class GodModeEngine:
         if not dfs: return False
         
         df = pd.concat(dfs, ignore_index=True)
-        
-        # Standardize Names
         col_map = {'Date':'date', 'HomeTeam':'home_team', 'AwayTeam':'away_team', 
                    'FTHG':'home_goals', 'FTAG':'away_goals', 
                    'HST':'home_shots_on_target', 'AST':'away_shots_on_target', 
@@ -137,7 +212,6 @@ class GodModeEngine:
         df['date'] = pd.to_datetime(df['date'], dayfirst=True, errors='coerce')
         df = df.sort_values('date').reset_index(drop=True)
         
-        # Fill missing stats with avg
         for c in ['home_shots_on_target', 'away_shots_on_target', 'home_corners', 'away_corners']:
             df[c] = df[c].fillna(df[c].mean())
             
@@ -147,7 +221,7 @@ class GodModeEngine:
     def engineer_features(self):
         df = self.master_df.copy()
         
-        # 1. ELO CALCULATION
+        # ELO
         df['home_elo'] = 1500.0
         df['away_elo'] = 1500.0
         curr_elo = {t: 1500.0 for t in pd.concat([df['home_team'], df['away_team']]).unique()}
@@ -162,13 +236,12 @@ class GodModeEngine:
             if row['home_goals'] > row['away_goals']: res = 1
             elif row['home_goals'] == row['away_goals']: res = 0.5
             else: res = 0
-
             dr = h_elo - a_elo
             e_h = 1 / (1 + 10**(-dr/400))
             curr_elo[h] += k * (res - e_h)
             curr_elo[a] += k * ((1-res) - (1-e_h))
             
-        # 2. EMA CALCULATION (Form)
+        # EMA
         def create_stream(df):
             h = df[['date', 'home_team', 'home_goals', 'home_shots_on_target', 'home_corners']].copy()
             h.columns = ['date', 'team', 'goals', 'sot', 'corners']
@@ -178,17 +251,15 @@ class GodModeEngine:
 
         stream = create_stream(df)
         cols = ['goals', 'sot', 'corners']
-        stream_ema = stream.groupby('team')[cols].transform(lambda x: x.shift(1).ewm(span=5, adjust=False).mean()) # Span 5 is smoother
+        stream_ema = stream.groupby('team')[cols].transform(lambda x: x.shift(1).ewm(span=5, adjust=False).mean())
         stream = pd.concat([stream, stream_ema.add_prefix('ema_')], axis=1)
 
-        # Merge EMA back
         df = df.merge(stream[['date', 'team', 'ema_goals', 'ema_sot', 'ema_corners']], 
                       left_on=['date', 'home_team'], right_on=['date', 'team'], how='left').rename(columns={'ema_goals':'h_ema_goals', 'ema_sot':'h_ema_sot', 'ema_corners':'h_ema_corn'}).drop(columns=['team'])
-        
         df = df.merge(stream[['date', 'team', 'ema_goals', 'ema_sot', 'ema_corners']], 
                       left_on=['date', 'away_team'], right_on=['date', 'team'], how='left').rename(columns={'ema_goals':'a_ema_goals', 'ema_sot':'a_ema_sot', 'ema_corners':'a_ema_corn'}).drop(columns=['team'])
 
-        # 3. DIFFERENTIALS
+        # DIFFS
         df['Elo_Diff'] = df['home_elo'] - df['away_elo']
         df['EMA_SOT_Diff'] = df['h_ema_sot'] - df['a_ema_sot']
         df['EMA_Corn_Diff'] = df['h_ema_corn'] - df['a_ema_corn']
@@ -197,48 +268,44 @@ class GodModeEngine:
         a_eff = df['a_ema_goals'] / (df['a_ema_sot'] + 0.1)
         df['Eff_Trend_Diff'] = h_eff - a_eff
 
-        # Target
         conditions = [df['home_goals'] > df['away_goals'], df['home_goals'] == df['away_goals']]
         df['target'] = np.select(conditions, [2, 1], default=0)
         
         self.master_df = df.dropna(subset=self.features).copy()
+        self.curr_elo_dict = curr_elo # Store for UI display
 
     def train_trinity_model(self):
         df = self.master_df
         X = df[self.features]
         y = df['target']
-        
-        # Scale
         self.scaler = StandardScaler()
         X_scaled = self.scaler.fit_transform(X)
-        
-        # TIME DECAY WEIGHTS
         weights = np.exp(np.linspace(0, 4, len(X)))
         
         # TRINITY ENSEMBLE
-        # Fixed: Removed deprecated 'multi_class' parameter
-        lr = LogisticRegression(C=0.05, max_iter=1000) 
+        lr = LogisticRegression(C=0.05, max_iter=1000)
         rf = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=42)
         xgb_mod = xgb.XGBClassifier(n_estimators=150, max_depth=3, learning_rate=0.05, 
                                     objective='multi:softmax', num_class=3, random_state=42)
         
         self.model = VotingClassifier(
             estimators=[('lr', lr), ('rf', rf), ('xgb', xgb_mod)],
-            voting='soft', weights=[1, 1, 3] # Heavy weight on XGBoost
+            voting='soft', weights=[1, 1, 3]
         )
-        
         self.model.fit(X_scaled, y, sample_weight=weights)
 
     def predict_match(self, h_team, a_team):
-        # Get latest data
+        # Fetch latest stats
         row_h = self.master_df[(self.master_df['home_team'] == h_team) | (self.master_df['away_team'] == h_team)].iloc[-1]
         row_a = self.master_df[(self.master_df['home_team'] == a_team) | (self.master_df['away_team'] == a_team)].iloc[-1]
         
         def get_stat(row, team, stat): return row[f'h_{stat}'] if row['home_team'] == team else row[f'a_{stat}']
-        def get_elo(row, team): return row['home_elo'] if row['home_team'] == team else row['away_elo']
+        
+        # Elo from our live dictionary to be most current
+        h_elo = self.curr_elo_dict.get(h_team, 1500)
+        a_elo = self.curr_elo_dict.get(a_team, 1500)
 
-        # Calc Inputs
-        elo_diff = get_elo(row_h, h_team) - get_elo(row_a, a_team)
+        elo_diff = h_elo - a_elo
         sot_diff = get_stat(row_h, h_team, 'ema_sot') - get_stat(row_a, a_team, 'ema_sot')
         corn_diff = get_stat(row_h, h_team, 'ema_corn') - get_stat(row_a, a_team, 'ema_corn')
         
@@ -250,115 +317,147 @@ class GodModeEngine:
         input_scaled = self.scaler.transform(input_vec)
         
         probs = self.model.predict_proba(input_scaled)[0]
-        return {'A': probs[0], 'D': probs[1], 'H': probs[2], 
-                'H_Elo': int(get_elo(row_h, h_team)), 'A_Elo': int(get_elo(row_a, a_team))}
+        return {'A': probs[0], 'D': probs[1], 'H': probs[2], 'H_Elo': int(h_elo), 'A_Elo': int(a_elo)}
 
 # ============================================
-# 4. INITIALIZATION
+# 4. INIT ENGINE
 # ============================================
 @st.cache_resource
-def load_god_mode():
+def load_elite_engine():
     eng = GodModeEngine()
-    eng.load_data()
-    eng.engineer_features()
-    eng.train_trinity_model()
-    return eng
+    if eng.load_data():
+        eng.engineer_features()
+        eng.train_trinity_model()
+        return eng
+    return None
 
-engine = load_god_mode()
-
+engine = load_elite_engine()
 if not engine: st.stop()
 
 # ============================================
 # 5. UI LAYOUT
 # ============================================
 
-st.markdown("<h1 style='text-align: center; color: #32f99a;'>GOD MODE <span style='color: white;'>PREDICTOR</span></h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #888;'>POWERED BY TRINITY ENSEMBLE (XGBOOST + RF + LR)</p>", unsafe_allow_html=True)
-st.markdown("---")
+# HEADER
+st.markdown("""
+<div style="text-align: center; margin-bottom: 40px;">
+    <h1 style="font-size: 4rem; margin: 0; color: #fff; letter-spacing: 5px;">MATCHDAY <span style="color: #39ff14;">ELITE</span></h1>
+    <p style="color: #66fcf1; letter-spacing: 2px; font-weight: bold;">AI-POWERED PREMIER LEAGUE INTELLIGENCE</p>
+</div>
+""", unsafe_allow_html=True)
 
-col1, col2, col3 = st.columns([1, 0.2, 1])
+# MAIN ARENA
+col1, col2, col3 = st.columns([1, 0.3, 1])
 
-# HOME SELECTION
+# --- HOME ---
 with col1:
-    st.markdown('<div class="team-col">', unsafe_allow_html=True)
-    st.markdown("### HOME")
-    h_team = st.selectbox("Select Home", engine.current_teams, index=0, label_visibility="collapsed")
-    st.image(get_logo(h_team), width=130)
+    st.markdown('<div class="team-container">', unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #66fcf1;'>HOME SQUAD</h3>", unsafe_allow_html=True)
+    h_team = st.selectbox("Select Home", engine.current_teams, index=0, label_visibility="collapsed", key="h_sel")
+    st.markdown(f'<img src="{get_logo(h_team)}" class="logo-img">', unsafe_allow_html=True)
+    
+    # Live Elo Tag
+    h_elo = int(engine.curr_elo_dict.get(h_team, 1500))
+    st.markdown(f"""
+        <div style="margin-top: 15px; border: 1px solid #39ff14; color: #39ff14; padding: 5px 15px; font-weight: bold; border-radius: 20px;">
+            PWR: {h_elo}
+        </div>
+    """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# VS
+# --- VS ---
 with col2:
-    st.markdown("<br><br><h1 style='text-align: center; color: #ff0055;'>VS</h1>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 80px'></div>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center; font-size: 5rem !important; color: #ff0055; text-shadow: 0 0 30px #ff0055;'>VS</h1>", unsafe_allow_html=True)
 
-# AWAY SELECTION
+# --- AWAY ---
 with col3:
-    st.markdown('<div class="team-col">', unsafe_allow_html=True)
-    st.markdown("### AWAY")
-    a_team = st.selectbox("Select Away", engine.current_teams, index=1, label_visibility="collapsed")
-    st.image(get_logo(a_team), width=130)
+    st.markdown('<div class="team-container">', unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #ff0055;'>AWAY SQUAD</h3>", unsafe_allow_html=True)
+    a_team = st.selectbox("Select Away", engine.current_teams, index=1, label_visibility="collapsed", key="a_sel")
+    st.markdown(f'<img src="{get_logo(a_team)}" class="logo-img">', unsafe_allow_html=True)
+    
+    # Live Elo Tag
+    a_elo = int(engine.curr_elo_dict.get(a_team, 1500))
+    st.markdown(f"""
+        <div style="margin-top: 15px; border: 1px solid #ff0055; color: #ff0055; padding: 5px 15px; font-weight: bold; border-radius: 20px;">
+            PWR: {a_elo}
+        </div>
+    """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# ODDS INPUT (For Value Betting)
-st.markdown("### 💰 ENTER BOOKMAKER ODDS (Optional)")
-c_o1, c_o2, c_o3 = st.columns(3)
-with c_o1: h_odds = st.number_input("Home Odds", value=2.00, step=0.01)
-with c_o2: d_odds = st.number_input("Draw Odds", value=3.20, step=0.01)
-with c_o3: a_odds = st.number_input("Away Odds", value=3.50, step=0.01)
+# ODDS & ACTION
+st.write("")
+st.write("")
+st.markdown("### 🎲 LIVE ODDS (OPTIONAL FOR VALUE CHECK)")
+c1, c2, c3 = st.columns(3)
+with c1: h_odds = st.number_input("Home Win Odds", 1.0, 20.0, 2.00, 0.01)
+with c2: d_odds = st.number_input("Draw Odds", 1.0, 20.0, 3.50, 0.01)
+with c3: a_odds = st.number_input("Away Win Odds", 1.0, 20.0, 4.00, 0.01)
 
 st.write("")
-if st.button("RUN TRINITY PREDICTION"):
+if st.button("INITIATE PREDICTION SEQUENCE"):
     if h_team == a_team:
-        st.warning("Teams must be different.")
+        st.warning("ERROR: SELECT DIFFERENT TEAMS")
     else:
-        with st.spinner("Calculating Exponential Moving Averages..."):
+        with st.spinner("CRUNCHING TACTICAL DATA..."):
             pred = engine.predict_match(h_team, a_team)
             
-            # DISPLAY RESULTS
+            # --- RESULTS SECTION ---
             st.markdown("---")
             
-            # 1. ELO COMPARISON
-            c1, c2 = st.columns(2)
-            c1.metric(f"{h_team} Elo", pred['H_Elo'])
-            c2.metric(f"{a_team} Elo", pred['A_Elo'])
-            
-            # 2. PROBABILITIES
-            st.markdown("### 📊 WIN PROBABILITY")
+            # 1. WIN PROBABILITY BAR
             p_h, p_d, p_a = pred['H'], pred['D'], pred['A']
-            
-            col_a, col_b, col_c = st.columns(3)
-            col_a.metric("HOME WIN", f"{p_h*100:.1f}%")
-            col_b.metric("DRAW", f"{p_d*100:.1f}%")
-            col_c.metric("AWAY WIN", f"{p_a*100:.1f}%")
-            
-            # Visual Bar
-            bar_html = f"""
-            <div style="width: 100%; height: 30px; display: flex; border-radius: 5px; overflow: hidden; margin-top: 10px;">
-                <div style="width: {p_h*100}%; background: #32f99a;"></div>
-                <div style="width: {p_d*100}%; background: #555;"></div>
-                <div style="width: {p_a*100}%; background: #ff0055;"></div>
+            st.markdown(f"""
+            <div style="margin-bottom: 10px; display: flex; justify-content: space-between; font-weight: bold; color: #ccc;">
+                <span>{h_team.upper()} ({int(p_h*100)}%)</span>
+                <span>DRAW ({int(p_d*100)}%)</span>
+                <span>{a_team.upper()} ({int(p_a*100)}%)</span>
             </div>
-            <div style="display: flex; justify-content: space-between; color: #888; font-size: 12px;">
-                <span>HOME</span><span>AWAY</span>
+            <div style="width: 100%; height: 35px; background: #333; display: flex; border-radius: 5px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.5);">
+                <div style="width: {p_h*100}%; background: #39ff14; box-shadow: 0 0 20px #39ff14;"></div>
+                <div style="width: {p_d*100}%; background: #2c3e50;"></div>
+                <div style="width: {p_a*100}%; background: #ff0055; box-shadow: 0 0 20px #ff0055;"></div>
             </div>
-            """
-            st.markdown(bar_html, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
             
-            # 3. VALUE BETTING CALCULATOR
-            st.markdown("### 💎 BETTING VALUE DETECTOR")
+            st.write("")
             
+            # 2. METRICS ROW
+            m1, m2, m3 = st.columns(3)
+            m1.metric("HOME CONFIDENCE", f"{p_h*100:.1f}%")
+            m2.metric("DRAW RISK", f"{p_d*100:.1f}%")
+            m3.metric("AWAY CONFIDENCE", f"{p_a*100:.1f}%")
+            
+            # 3. VALUE BETTING CARD
+            st.markdown("<br>", unsafe_allow_html=True)
             ev_h = (p_h * h_odds) - 1
             ev_d = (p_d * d_odds) - 1
             ev_a = (p_a * a_odds) - 1
-            
             best_ev = max(ev_h, ev_d, ev_a)
             
-            if best_ev > 0.05: # 5% Edge
-                if best_ev == ev_h: rec = f"BET HOME ({h_team})"
-                elif best_ev == ev_d: rec = "BET DRAW"
-                else: rec = f"BET AWAY ({a_team})"
+            if best_ev > 0.03: # 3% Edge Threshold
+                if best_ev == ev_h: 
+                    rec_text = f"BET HOME: {h_team.upper()}"
+                    border_col = "#39ff14"
+                elif best_ev == ev_d: 
+                    rec_text = "BET DRAW"
+                    border_col = "#66fcf1"
+                else: 
+                    rec_text = f"BET AWAY: {a_team.upper()}"
+                    border_col = "#ff0055"
                 
-                st.success(f"✅ **VALUE FOUND:** {rec} (EV: {best_ev*100:.1f}%)")
-                st.caption("The model thinks the odds are higher than the real risk.")
+                st.markdown(f"""
+                <div style="background: rgba(0,0,0,0.6); border: 2px solid {border_col}; padding: 20px; text-align: center; border-radius: 10px;">
+                    <h2 style="color: {border_col}; margin: 0; text-shadow: 0 0 10px {border_col};">💎 HIGH VALUE DETECTED</h2>
+                    <h1 style="color: white; margin: 10px 0;">{rec_text}</h1>
+                    <p style="color: #ccc; margin: 0;">CALCULATED EDGE: <span style="color: white; font-weight: bold;">+{best_ev*100:.1f}%</span> ROI</p>
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.error("🛑 NO VALUE BET FOUND")
-                st.caption("The bookmaker odds are too stingy compared to our calculated probability. Stay away.")
+                st.markdown("""
+                <div style="background: rgba(0,0,0,0.6); border: 2px solid #555; padding: 20px; text-align: center; border-radius: 10px;">
+                    <h3 style="color: #888; margin: 0;">🚫 NO VALUE PLAY</h3>
+                    <p style="color: #666; margin: 5px 0;">Bookmaker odds are accurate. No statistical edge found.</p>
+                </div>
+                """, unsafe_allow_html=True)
