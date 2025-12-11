@@ -14,7 +14,7 @@ from sklearn.preprocessing import LabelEncoder
 # ============================================
 st.set_page_config(
     page_title="PL Predictor",
-    page_icon="🦁",
+    page_icon="⚽",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -454,3 +454,4 @@ with tab3:
         return ['background-color: #004d29' if v == '✔' else 'background-color: #4d0019' if v == '✖' else '' for v in s]
 
     st.dataframe(history_df.style.apply(highlight_correct, subset=['Correct']), use_container_width=True)
+
