@@ -3,25 +3,22 @@ import pandas as pd
 import numpy as np
 import requests
 import io
-import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import LabelEncoder
 
 # ============================================
-# 1. PAGE CONFIGURATION
+# 1. APP CONFIGURATION & ASSETS
 # ============================================
 st.set_page_config(
     page_title="PL Predictor",
-    page_icon="⚽",
+    page_icon="🦁",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ============================================
-# 2. LOGO DATABASE (SOURCE: FOTMOB CDN)
-# ============================================
+# --- LOGO DATABASE (Source: FotMob CDN for stability) ---
 TEAM_LOGOS = {
     "Arsenal": "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png",
     "Aston Villa": "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png",
@@ -54,7 +51,7 @@ def get_logo(team_name):
     return TEAM_LOGOS.get(team_name, "https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg")
 
 # ============================================
-# 3. OFFICIAL PREMIER LEAGUE CSS THEME
+# 2. OFFICIAL PREMIER LEAGUE CSS THEME
 # ============================================
 st.markdown("""
     <style>
@@ -80,15 +77,52 @@ st.markdown("""
         letter-spacing: -0.5px;
     }
     
-    p, label, .stMarkdown, div {
+    p, label, .stMarkdown, div, span {
         font-family: 'Poppins', sans-serif !important;
     }
     
+    /* --- FLEXBOX CENTERING WRAPPER --- */
+    .team-col-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Ensures horizontal centering */
+        justify-content: flex-start;
+        height: 100%;
+        width: 100%;
+    }
+
+    /* LOGO STYLING */
+    .team-logo-img {
+        max-height: 160px;
+        width: auto;
+        /* Auto margins are crucial for centering block elements */
+        margin: 25px auto; 
+        display: block;
+        filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+        transition: transform 0.3s ease;
+    }
+    .team-logo-img:hover {
+        transform: scale(1.05);
+    }
+    
+    /* VS VERTICAL ALIGNMENT */
+    .vs-col-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding-top: 80px; /* Push down to align with logos */
+    }
+
     /* DROPDOWNS */
     div[data-baseweb="select"] > div {
         background-color: white !important;
         color: #38003c !important;
         border-radius: 4px;
+        border: 2px solid transparent;
+    }
+    div[data-baseweb="select"] > div:hover {
+        border-color: var(--pl-green);
     }
     div[data-baseweb="select"] span {
         color: #38003c !important; 
@@ -176,7 +210,7 @@ class EPLPredictor:
         self.le_team = LabelEncoder()
         self.elo = EloTracker(k_factor=20)
         self.matches = None
-        self.current_season_teams = [] # Stores only current PL teams
+        self.current_season_teams = []
 
     def fetch_data(self):
         frames = []
@@ -185,12 +219,9 @@ class EPLPredictor:
                 s = requests.get(url).content
                 df = pd.read_csv(io.StringIO(s.decode('latin-1')))
                 df = df.dropna(how='all')
-                
-                # If this is the 25/26 file, capture these teams as "current"
                 if "2526" in url:
-                    teams = pd.concat([df['HomeTeam'], df['AwayTeam']]).dropna().unique()
-                    self.current_season_teams = sorted(teams)
-                    
+                     teams = pd.concat([df['HomeTeam'], df['AwayTeam']]).dropna().unique()
+                     self.current_season_teams = sorted(teams)
                 frames.append(df)
             except: pass
         
@@ -201,7 +232,6 @@ class EPLPredictor:
         self.data = self.data.sort_values('Date').reset_index(drop=True)
         self.matches = self.data[self.data['FTR'].notna()].copy()
         
-        # Fallback if 25/26 file is empty/early season
         if not self.current_season_teams:
              last_season_matches = self.matches[self.matches['Date'] > '2024-08-01']
              self.current_season_teams = sorted(pd.concat([last_season_matches['HomeTeam'], last_season_matches['AwayTeam']]).unique())
@@ -255,7 +285,7 @@ class EPLPredictor:
             
             results.append({
                 "Date": row['Date'].strftime('%d %b'),
-                "Match": f"{home} vs {away}",
+                "Match": f"{home} v {away}",
                 "Result": actual,
                 "Prediction": predicted_outcome,
                 "Correct": "✔" if is_correct else "✖"
@@ -322,7 +352,7 @@ engine = load_pl_engine_vFinal()
 st.markdown("""
 <div style="background-color: #38003c; padding: 20px; border-bottom: 4px solid #00ff85; margin-bottom: 25px;">
     <h1 style="color: white; margin:0; font-size: 3rem;">PREMIER LEAGUE <span style="color: #00ff85">PREDICTOR</span></h1>
-    <p style="color: #e0e0e0; margin:0; font-size: 1.1rem;">FAN-MADE MATCHDAY INSIGHTS</p>
+    <p style="color: #e0e0e0; margin:0; font-size: 1.1rem;">OFFICIAL MATCHDAY INSIGHTS</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -334,54 +364,59 @@ if not engine:
     st.error("Connection to PL Database failed. Please reload.")
     st.stop()
 
-# Use ONLY current season teams
 current_teams = engine.current_season_teams
 
 # Tabs for Navigation
 tab1, tab2, tab3 = st.tabs(["MATCH CENTRE", "TABLE", "FORM GUIDE"])
 
-# --- TAB 1: MATCH CENTRE (With Logos & Elo) ---
+# --- TAB 1: MATCH CENTRE ---
 with tab1:
-    col1, col2, col3 = st.columns([1, 0.2, 1])
+    # Slightly wider side columns for better centering space
+    col1, col2, col3 = st.columns([1.2, 0.3, 1.2])
     
-    # --- HOME COLUMN ---
+    # --- HOME COLUMN (Centered Wrapper) ---
     with col1:
-        st.markdown("<div style='text-align: center; color: #fff; font-weight: bold;'>HOME CLUB</div>", unsafe_allow_html=True)
+        st.markdown('<div class="team-col-wrapper">', unsafe_allow_html=True)
+        st.markdown("### HOME CLUB")
         h_team = st.selectbox("H_Select", current_teams, index=0, label_visibility="collapsed", key="h_team_select")
         
-        # LOGO & ELO
-        st.image(get_logo(h_team), width=150, use_container_width=False)
+        # LOGO (Using HTML img for perfect centering control)
+        st.markdown(f'<img src="{get_logo(h_team)}" class="team-logo-img">', unsafe_allow_html=True)
         
+        # ELO BOX
         h_elo_val = int(engine.elo.get_rating(h_team))
         st.markdown(f"""
-            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 5px; border-radius: 5px;">
-                <span style="color:#38003c; font-size: 0.8rem; font-weight: bold;">ELO RATING</span><br>
-                <span style="color:#38003c; font-size: 1.5rem; font-weight: 900;">{h_elo_val}</span>
+            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <span style="color:#38003c; font-size: 0.9rem; font-weight: bold; text-transform: uppercase;">Elo Rating</span><br>
+                <span style="color:#38003c; font-size: 2rem; font-weight: 900;">{h_elo_val}</span>
             </div>
             """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
-    # --- VS COLUMN ---
+    # --- VS COLUMN (Vertically Aligned) ---
     with col2:
-        st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
-        st.markdown("<h1 style='text-align: center; color: #e90052 !important; font-size: 3rem !important;'>VS</h1>", unsafe_allow_html=True)
+        st.markdown('<div class="vs-col-wrapper">', unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #e90052 !important; font-size: 3.5rem !important; margin: 0;'>VS</h1>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         
-    # --- AWAY COLUMN ---
+    # --- AWAY COLUMN (Centered Wrapper) ---
     with col3:
-        st.markdown("<div style='text-align: center; color: #fff; font-weight: bold;'>AWAY CLUB</div>", unsafe_allow_html=True)
+        st.markdown('<div class="team-col-wrapper">', unsafe_allow_html=True)
+        st.markdown("### AWAY CLUB")
         a_team = st.selectbox("A_Select", current_teams, index=1, label_visibility="collapsed", key="a_team_select")
         
-        # LOGO & ELO
-        # Using a column to center the image better if needed, but st.image default is left aligned
-        # so we use custom html centering or just st.columns inside
-        st.markdown(f"<div style='display: flex; justify-content: flex-end'><img src='{get_logo(a_team)}' width='150'></div>", unsafe_allow_html=True)
+        # LOGO
+        st.markdown(f'<img src="{get_logo(a_team)}" class="team-logo-img">', unsafe_allow_html=True)
         
+        # ELO BOX
         a_elo_val = int(engine.elo.get_rating(a_team))
         st.markdown(f"""
-            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 5px; border-radius: 5px;">
-                <span style="color:#38003c; font-size: 0.8rem; font-weight: bold;">ELO RATING</span><br>
-                <span style="color:#38003c; font-size: 1.5rem; font-weight: 900;">{a_elo_val}</span>
+            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 10px 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                <span style="color:#38003c; font-size: 0.9rem; font-weight: bold; text-transform: uppercase;">Elo Rating</span><br>
+                <span style="color:#38003c; font-size: 2rem; font-weight: 900;">{a_elo_val}</span>
             </div>
             """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
     st.write("")
     st.write("")
@@ -394,8 +429,8 @@ with tab1:
             pred = engine.predict_future(h_team, a_team)
             
             # --- THE "OFFICIAL" BROADCAST GRAPHIC ---
-            st.write("")
-            st.markdown("<h3 style='text-align: center; margin-bottom: 10px;'>FULL TIME PROBABILITY</h3>", unsafe_allow_html=True)
+            st.markdown("---")
+            st.markdown("<h3 style='text-align: center; margin-bottom: 20px; color: #00ff85 !important;'>MATCH FORECAST</h3>", unsafe_allow_html=True)
             
             c1, c2, c3 = st.columns(3)
             with c1:
@@ -407,14 +442,14 @@ with tab1:
 
             # The "PL Green" Bar
             bar_html = f"""
-            <div style="margin-top: 20px; width: 100%; height: 25px; display: flex; border-radius: 12px; overflow: hidden; background: #333;">
-                <div style="width: {pred['H']*100}%; background: #00ff85;"></div>
-                <div style="width: {pred['D']*100}%; background: #888;"></div>
-                <div style="width: {pred['A']*100}%; background: #e90052;"></div>
+            <div style="margin-top: 30px; width: 100%; height: 30px; display: flex; border-radius: 15px; overflow: hidden; background: #222; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                <div style="width: {pred['H']*100}%; background: linear-gradient(90deg, #00ff85, #00cc6a); display: flex; align-items: center; justify-content: center; color: #38003c; font-weight: 900;">{int(pred['H']*100)}%</div>
+                <div style="width: {pred['D']*100}%; background: #888; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">D</div>
+                <div style="width: {pred['A']*100}%; background: linear-gradient(90deg, #e90052, #ff0055); display: flex; align-items: center; justify-content: center; color: white; font-weight: 900;">{int(pred['A']*100)}%</div>
             </div>
-            <div style="display: flex; justify-content: space-between; color: #bbb; font-size: 0.8rem; margin-top: 5px;">
-                <span>HOME</span>
-                <span>AWAY</span>
+            <div style="display: flex; justify-content: space-between; color: #bbb; font-size: 0.9rem; margin-top: 10px; font-weight: 700;">
+                <span>{h_team.upper()}</span>
+                <span>{a_team.upper()}</span>
             </div>
             """
             st.markdown(bar_html, unsafe_allow_html=True)
@@ -423,10 +458,7 @@ with tab1:
 with tab2:
     st.markdown("### LIVE CLUB RATINGS")
     elo_data = pd.DataFrame(list(engine.elo.ratings.items()), columns=['Club', 'Rating'])
-    
-    # FILTER: Only show current season teams
     elo_data = elo_data[elo_data['Club'].isin(current_teams)]
-    
     elo_data['Rating'] = elo_data['Rating'].astype(int)
     elo_data = elo_data.sort_values('Rating', ascending=False).reset_index(drop=True)
     elo_data.index += 1
@@ -449,14 +481,7 @@ with tab2:
 with tab3:
     st.markdown("### MODEL ACCURACY (LAST 20 GAMES)")
     history_df = engine.evaluate_recent_performance(n_games=20)
-    
-    # Styled Table
     def highlight_correct(s):
-        return ['background-color: #004d29' if v == '✔' else 'background-color: #4d0019' if v == '✖' else '' for v in s]
+        return ['background-color: #00ff85; color: #38003c; font-weight: bold;' if v == '✔' else 'background-color: #e90052; color: white; font-weight: bold;' if v == '✖' else '' for v in s]
 
     st.dataframe(history_df.style.apply(highlight_correct, subset=['Correct']), use_container_width=True)
-
-
-
-
-
