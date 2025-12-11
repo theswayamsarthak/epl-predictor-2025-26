@@ -3,25 +3,25 @@ import pandas as pd
 import numpy as np
 import requests
 import io
-import datetime
+import matplotlib.pyplot as plt
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import LabelEncoder
 
 # ============================================
-# 1. CONFIG & ASSETS
+# 1. PAGE CONFIGURATION
 # ============================================
 st.set_page_config(
-    page_title="PL Official Matchday",
+    page_title="PL Predictor",
     page_icon="🦁",
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
-# --- LOGO DATABASE ---
-# Maps the specific names in football-data.co.uk to clean PNG URLs
-# We use Wikimedia/Wikipedia URLs for stability and transparency
+# ============================================
+# 2. LOGO DATABASE
+# ============================================
 TEAM_LOGOS = {
     "Arsenal": "https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg",
     "Aston Villa": "https://upload.wikimedia.org/wikipedia/en/f/f9/Aston_Villa_FC_crest_%282016%29.svg",
@@ -50,81 +50,101 @@ TEAM_LOGOS = {
 }
 
 def get_logo(team_name):
-    return TEAM_LOGOS.get(team_name, "https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg") # Fallback icon
+    return TEAM_LOGOS.get(team_name, "https://upload.wikimedia.org/wikipedia/commons/d/d3/Soccerball.svg")
 
 # ============================================
-# 2. OFFICIAL PREMIER LEAGUE CSS
+# 3. OFFICIAL PREMIER LEAGUE CSS THEME
 # ============================================
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;900&display=swap');
-    
+
     :root {
         --pl-purple: #38003c;
         --pl-green: #00ff85;
         --pl-pink: #e90052;
+        --pl-white: #ffffff;
     }
 
     .stApp {
         background-color: var(--pl-purple);
-        background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
-        color: white;
+        background-image: url("https://www.transparenttextures.com/patterns/cubes.png"); 
+        color: var(--pl-white);
     }
 
-    h1, h2, h3 { font-family: 'Poppins', sans-serif !important; font-weight: 900 !important; letter-spacing: -1px; }
-    p, div { font-family: 'Poppins', sans-serif !important; }
-
-    /* VS Badge */
-    .vs-badge {
-        font-size: 40px;
-        color: var(--pl-pink);
-        font-weight: 900;
-        text-shadow: 2px 2px 0px #fff;
-    }
-
-    /* Team Dropdown Styling */
-    div[data-baseweb="select"] > div {
-        background-color: white !important;
-        color: var(--pl-purple) !important;
-        border: none;
-        font-weight: 700;
+    h1, h2, h3, h4, h5 {
+        font-family: 'Poppins', sans-serif !important;
+        font-weight: 900 !important;
+        color: var(--pl-white) !important;
+        letter-spacing: -0.5px;
     }
     
-    /* Metrics */
+    p, label, .stMarkdown, div {
+        font-family: 'Poppins', sans-serif !important;
+    }
+    
+    /* DROPDOWNS */
+    div[data-baseweb="select"] > div {
+        background-color: white !important;
+        color: #38003c !important;
+        border-radius: 4px;
+    }
+    div[data-baseweb="select"] span {
+        color: #38003c !important; 
+        font-weight: 700;
+    }
+
+    /* BUTTONS */
+    div.stButton > button {
+        background: linear-gradient(90deg, #e90052 0%, #ff0055 100%);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 0.75rem 2rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(233, 0, 82, 0.4);
+    }
+    div.stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(233, 0, 82, 0.6);
+    }
+
+    /* METRICS */
     div[data-testid="stMetric"] {
-        background: rgba(255,255,255,0.05);
+        background-color: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 15px;
         border-left: 5px solid var(--pl-green);
-        padding: 10px;
     }
     div[data-testid="stMetricValue"] {
         color: var(--pl-green) !important;
-        font-size: 2rem !important;
     }
-
-    /* Prediction Button */
-    .stButton button {
-        background: linear-gradient(90deg, #e90052 0%, #ff0055 100%);
-        color: white;
-        text-transform: uppercase;
-        font-weight: 800;
-        border: none;
-        padding: 15px 0;
-        font-size: 18px;
-        width: 100%;
-        transition: 0.3s;
-    }
-    .stButton button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 20px rgba(233, 0, 82, 0.6);
+    div[data-testid="stMetricLabel"] {
+        color: #fff !important;
     }
     
-    /* Clean up standard Streamlit UI */
-    #MainMenu, footer, header {visibility: hidden;}
+    /* DATAFRAMES */
+    div[data-testid="stDataFrame"] {
+        background-color: white;
+        border-radius: 8px;
+        padding: 10px;
+    }
+    thead tr th {
+        background-color: var(--pl-purple) !important;
+        color: white !important;
+    }
+
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # ============================================
-# 3. BACKEND ENGINE
+# 4. BACKEND LOGIC
 # ============================================
 
 class EloTracker:
@@ -147,7 +167,6 @@ class EloTracker:
 
 class EPLPredictor:
     def __init__(self):
-        # We load multiple seasons to train the model...
         self.urls = [
             "https://www.football-data.co.uk/mmz4281/2425/E0.csv",
             "https://www.football-data.co.uk/mmz4281/2526/E0.csv"
@@ -156,7 +175,7 @@ class EPLPredictor:
         self.le_team = LabelEncoder()
         self.elo = EloTracker(k_factor=20)
         self.matches = None
-        self.current_season_teams = [] # New list for filtering
+        self.current_season_teams = [] # Stores only current PL teams
 
     def fetch_data(self):
         frames = []
@@ -166,9 +185,8 @@ class EPLPredictor:
                 df = pd.read_csv(io.StringIO(s.decode('latin-1')))
                 df = df.dropna(how='all')
                 
-                # Check if this is the latest file to grab current teams
+                # If this is the 25/26 file, capture these teams as "current"
                 if "2526" in url:
-                    # Get unique teams from Home and Away columns of the latest file
                     teams = pd.concat([df['HomeTeam'], df['AwayTeam']]).dropna().unique()
                     self.current_season_teams = sorted(teams)
                     
@@ -182,11 +200,11 @@ class EPLPredictor:
         self.data = self.data.sort_values('Date').reset_index(drop=True)
         self.matches = self.data[self.data['FTR'].notna()].copy()
         
-        # Fallback: If 25/26 file is empty (start of season), grab from 24/25
+        # Fallback if 25/26 file is empty/early season
         if not self.current_season_teams:
              last_season_matches = self.matches[self.matches['Date'] > '2024-08-01']
              self.current_season_teams = sorted(pd.concat([last_season_matches['HomeTeam'], last_season_matches['AwayTeam']]).unique())
-
+             
         return True
 
     def run_training_cycle(self):
@@ -219,6 +237,29 @@ class EPLPredictor:
         self.X = pd.DataFrame(features)
         self.y = self.matches['Result_Code']
         self.model.fit(self.X, self.y)
+
+    def evaluate_recent_performance(self, n_games=20):
+        recent = self.matches.tail(n_games).copy()
+        features_subset = self.X.tail(n_games)
+        probs = self.model.predict_proba(features_subset)
+        
+        results = []
+        for i, (idx, row) in enumerate(recent.iterrows()):
+            home = row['HomeTeam']
+            away = row['AwayTeam']
+            actual = row['FTR']
+            p_away, p_draw, p_home = probs[i]
+            predicted_outcome = "H" if p_home > p_away and p_home > p_draw else "A" if p_away > p_home and p_away > p_draw else "D"
+            is_correct = (predicted_outcome == actual)
+            
+            results.append({
+                "Date": row['Date'].strftime('%d %b'),
+                "Match": f"{home} vs {away}",
+                "Result": actual,
+                "Prediction": predicted_outcome,
+                "Correct": "✔" if is_correct else "✖"
+            })
+        return pd.DataFrame(results)
 
     def _get_recent(self, team, idx):
         return self.matches[((self.matches['HomeTeam'] == team) | (self.matches['AwayTeam'] == team)) & (self.matches.index < idx)].tail(5)
@@ -261,125 +302,155 @@ class EPLPredictor:
         return {'A': probs[0], 'D': probs[1], 'H': probs[2]}
 
 # ============================================
-# 4. INITIALIZE APP
+# 5. INITIALIZATION
 # ============================================
 
 @st.cache_resource
-def load_app_v2():
+def load_pl_engine_vFinal():
     eng = EPLPredictor()
     if eng.fetch_data():
         eng.run_training_cycle()
         return eng
     return None
 
-engine = load_app_v2()
-
-if not engine:
-    st.error("Could not load data. Please check internet connection.")
-    st.stop()
+engine = load_pl_engine_vFinal()
 
 # ============================================
-# 5. UI: "QUICK MATCH" LAYOUT
+# 6. HEADER
 # ============================================
-
-# Use the FILTERED list (Current Season Only)
-current_teams = engine.current_season_teams
-
-# Header
 st.markdown("""
-<div style="text-align: center; margin-bottom: 30px;">
-    <h1 style="font-size: 3rem; margin-bottom: 0;">MATCHDAY <span style="color: #00ff85">CENTRE</span></h1>
-    <p style="color: #bbb;">OFFICIAL PREMIER LEAGUE AI PREDICTOR</p>
+<div style="background-color: #38003c; padding: 20px; border-bottom: 4px solid #00ff85; margin-bottom: 25px;">
+    <h1 style="color: white; margin:0; font-size: 3rem;">PREMIER LEAGUE <span style="color: #00ff85">PREDICTOR</span></h1>
+    <p style="color: #e0e0e0; margin:0; font-size: 1.1rem;">OFFICIAL MATCHDAY INSIGHTS</p>
 </div>
 """, unsafe_allow_html=True)
 
-# The "FC26" Style Layout: Logo on top, Dropdown below
-col1, col2, col3 = st.columns([1, 0.3, 1])
+# ============================================
+# 7. MAIN UI
+# ============================================
 
-with col1:
-    st.markdown("<h3 style='text-align: center; color: #fff;'>HOME</h3>", unsafe_allow_html=True)
-    h_team = st.selectbox("Home Team", current_teams, index=0, label_visibility="collapsed", key="h_team_select")
+if not engine:
+    st.error("Connection to PL Database failed. Please reload.")
+    st.stop()
+
+# Use ONLY current season teams
+current_teams = engine.current_season_teams
+
+# Tabs for Navigation
+tab1, tab2, tab3 = st.tabs(["MATCH CENTRE", "TABLE", "FORM GUIDE"])
+
+# --- TAB 1: MATCH CENTRE (With Logos & Elo) ---
+with tab1:
+    col1, col2, col3 = st.columns([1, 0.2, 1])
     
-    # BIG LOGO DISPLAY
-    st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin: 20px 0;">
-            <img src="{get_logo(h_team)}" style="height: 150px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-        </div>
-    """, unsafe_allow_html=True)
-    
-with col2:
-    st.markdown("<div style='height: 100px;'></div>", unsafe_allow_html=True) # Spacer
-    st.markdown("<div class='vs-badge' style='text-align: center;'>VS</div>", unsafe_allow_html=True)
-
-with col3:
-    st.markdown("<h3 style='text-align: center; color: #fff;'>AWAY</h3>", unsafe_allow_html=True)
-    a_team = st.selectbox("Away Team", current_teams, index=1, label_visibility="collapsed", key="a_team_select")
-    
-    # BIG LOGO DISPLAY
-    st.markdown(f"""
-        <div style="display: flex; justify-content: center; margin: 20px 0;">
-            <img src="{get_logo(a_team)}" style="height: 150px; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
-        </div>
-    """, unsafe_allow_html=True)
-
-# PREDICTION ACTION
-st.write("")
-st.write("")
-col_btn_1, col_btn_2, col_btn_3 = st.columns([1, 2, 1])
-
-with col_btn_2:
-    if st.button("KICK OFF PREDICTION"):
-        if h_team == a_team:
-            st.warning("Please select two different teams!")
-        else:
-            pred = engine.predict_future(h_team, a_team)
-            
-            # SCROLL TO RESULT
-            st.markdown("---")
-            
-            # Winner Logic
-            win_prob = max(pred.values())
-            if pred['H'] == win_prob: 
-                winner_text = f"{h_team} WIN"
-                win_color = "#00ff85"
-            elif pred['A'] == win_prob:
-                winner_text = f"{a_team} WIN"
-                win_color = "#e90052"
-            else:
-                winner_text = "DRAW"
-                win_color = "#cccccc"
-
-            # RESULT BANNER
-            st.markdown(f"""
-            <div style="background: rgba(255,255,255,0.1); border-radius: 10px; padding: 30px; text-align: center; border: 2px solid {win_color};">
-                <h4 style="color: #ddd; margin: 0;">PREDICTED OUTCOME</h4>
-                <h1 style="font-size: 4rem; margin: 10px 0; color: {win_color}; text-shadow: 0 0 20px {win_color}40;">{winner_text}</h1>
-                <div style="display: flex; justify-content: center; gap: 20px; margin-top: 20px;">
-                    <div>
-                        <div style="font-size: 0.9rem; color: #aaa;">HOME</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: white;">{int(pred['H']*100)}%</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.9rem; color: #aaa;">DRAW</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: white;">{int(pred['D']*100)}%</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.9rem; color: #aaa;">AWAY</div>
-                        <div style="font-size: 1.5rem; font-weight: bold; color: white;">{int(pred['A']*100)}%</div>
-                    </div>
-                </div>
+    # --- HOME COLUMN ---
+    with col1:
+        st.markdown("<div style='text-align: center; color: #fff; font-weight: bold;'>HOME CLUB</div>", unsafe_allow_html=True)
+        h_team = st.selectbox("H_Select", current_teams, index=0, label_visibility="collapsed", key="h_team_select")
+        
+        # LOGO & ELO
+        st.image(get_logo(h_team), width=150, use_container_width=False)
+        
+        h_elo_val = int(engine.elo.get_rating(h_team))
+        st.markdown(f"""
+            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 5px; border-radius: 5px;">
+                <span style="color:#38003c; font-size: 0.8rem; font-weight: bold;">ELO RATING</span><br>
+                <span style="color:#38003c; font-size: 1.5rem; font-weight: 900;">{h_elo_val}</span>
+            </div>
+            """, unsafe_allow_html=True)
+        
+    # --- VS COLUMN ---
+    with col2:
+        st.markdown("<div style='height: 80px;'></div>", unsafe_allow_html=True)
+        st.markdown("<h1 style='text-align: center; color: #e90052 !important; font-size: 3rem !important;'>VS</h1>", unsafe_allow_html=True)
+        
+    # --- AWAY COLUMN ---
+    with col3:
+        st.markdown("<div style='text-align: center; color: #fff; font-weight: bold;'>AWAY CLUB</div>", unsafe_allow_html=True)
+        a_team = st.selectbox("A_Select", current_teams, index=1, label_visibility="collapsed", key="a_team_select")
+        
+        # LOGO & ELO
+        # Using a column to center the image better if needed, but st.image default is left aligned
+        # so we use custom html centering or just st.columns inside
+        st.markdown(f"<div style='display: flex; justify-content: flex-end'><img src='{get_logo(a_team)}' width='150'></div>", unsafe_allow_html=True)
+        
+        a_elo_val = int(engine.elo.get_rating(a_team))
+        st.markdown(f"""
+            <div style="text-align: center; margin-top: 10px; background: #fff; padding: 5px; border-radius: 5px;">
+                <span style="color:#38003c; font-size: 0.8rem; font-weight: bold;">ELO RATING</span><br>
+                <span style="color:#38003c; font-size: 1.5rem; font-weight: 900;">{a_elo_val}</span>
             </div>
             """, unsafe_allow_html=True)
 
-# ELO TABLE IN EXPANDER
-with st.expander("VIEW LIVE LEAGUE STANDINGS"):
+    st.write("")
+    st.write("")
+    
+    # --- ACTION BUTTON ---
+    if st.button("PREDICT RESULT", use_container_width=True):
+        if h_team == a_team:
+            st.warning("Please select two different clubs.")
+        else:
+            pred = engine.predict_future(h_team, a_team)
+            
+            # --- THE "OFFICIAL" BROADCAST GRAPHIC ---
+            st.write("")
+            st.markdown("<h3 style='text-align: center; margin-bottom: 10px;'>FULL TIME PROBABILITY</h3>", unsafe_allow_html=True)
+            
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric("HOME WIN", f"{int(pred['H']*100)}%")
+            with c2:
+                st.metric("DRAW", f"{int(pred['D']*100)}%")
+            with c3:
+                st.metric("AWAY WIN", f"{int(pred['A']*100)}%")
+
+            # The "PL Green" Bar
+            bar_html = f"""
+            <div style="margin-top: 20px; width: 100%; height: 25px; display: flex; border-radius: 12px; overflow: hidden; background: #333;">
+                <div style="width: {pred['H']*100}%; background: #00ff85;"></div>
+                <div style="width: {pred['D']*100}%; background: #888;"></div>
+                <div style="width: {pred['A']*100}%; background: #e90052;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; color: #bbb; font-size: 0.8rem; margin-top: 5px;">
+                <span>HOME</span>
+                <span>AWAY</span>
+            </div>
+            """
+            st.markdown(bar_html, unsafe_allow_html=True)
+
+# --- TAB 2: TABLE (ELO) - FILTERED ---
+with tab2:
+    st.markdown("### LIVE CLUB RATINGS")
     elo_data = pd.DataFrame(list(engine.elo.ratings.items()), columns=['Club', 'Rating'])
     
-    # Filter Elo Table to only show current teams as well
+    # FILTER: Only show current season teams
     elo_data = elo_data[elo_data['Club'].isin(current_teams)]
     
     elo_data['Rating'] = elo_data['Rating'].astype(int)
     elo_data = elo_data.sort_values('Rating', ascending=False).reset_index(drop=True)
     elo_data.index += 1
-    st.dataframe(elo_data, use_container_width=True)
+    
+    st.dataframe(
+        elo_data,
+        use_container_width=True,
+        column_config={
+            "Rating": st.column_config.ProgressColumn(
+                "Power Index",
+                format="%d",
+                min_value=1300,
+                max_value=2200,
+            ),
+        },
+        height=600
+    )
 
+# --- TAB 3: FORM GUIDE ---
+with tab3:
+    st.markdown("### MODEL ACCURACY (LAST 20 GAMES)")
+    history_df = engine.evaluate_recent_performance(n_games=20)
+    
+    # Styled Table
+    def highlight_correct(s):
+        return ['background-color: #004d29' if v == '✔' else 'background-color: #4d0019' if v == '✖' else '' for v in s]
+
+    st.dataframe(history_df.style.apply(highlight_correct, subset=['Correct']), use_container_width=True)
