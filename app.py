@@ -321,7 +321,7 @@ engine = load_pl_engine_vFinal()
 st.markdown("""
 <div style="background-color: #38003c; padding: 20px; border-bottom: 4px solid #00ff85; margin-bottom: 25px;">
     <h1 style="color: white; margin:0; font-size: 3rem;">PREMIER LEAGUE <span style="color: #00ff85">PREDICTOR</span></h1>
-    <p style="color: #e0e0e0; margin:0; font-size: 1.1rem;">OFFICIAL MATCHDAY INSIGHTS</p>
+    <p style="color: #e0e0e0; margin:0; font-size: 1.1rem;">FAN-MADE MATCHDAY INSIGHTS</p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -454,4 +454,5 @@ with tab3:
         return ['background-color: #004d29' if v == '✔' else 'background-color: #4d0019' if v == '✖' else '' for v in s]
 
     st.dataframe(history_df.style.apply(highlight_correct, subset=['Correct']), use_container_width=True)
+
 
