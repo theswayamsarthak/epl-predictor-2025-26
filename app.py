@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 
 # ============================================
-# 1. APP CONFIGURATION & ASSETS
+# 1. APP CONFIGURATION
 # ============================================
 st.set_page_config(
     page_title="PL Matchday Official",
@@ -18,7 +18,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- LOGO DATABASE (FotMob High-Res) ---
+# --- LOGO DATABASE ---
 TEAM_LOGOS = {
     "Arsenal": "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png",
     "Aston Villa": "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png",
@@ -64,7 +64,7 @@ st.markdown("""
         --pl-white: #ffffff;
     }
 
-    /* GLOBAL BACKGROUND */
+    /* BACKGROUND */
     .stApp {
         background-color: var(--pl-purple);
         background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
@@ -78,12 +78,12 @@ st.markdown("""
         letter-spacing: -0.5px;
     }
 
-    /* DROPDOWNS & INPUTS */
-    div[data-baseweb="select"] > div, div[data-baseweb="input"] > div {
+    /* DROPDOWNS */
+    div[data-baseweb="select"] > div {
         background-color: white !important;
         color: var(--pl-purple) !important;
-        border-radius: 4px;
         border: none;
+        border-radius: 4px;
     }
     div[data-baseweb="select"] span {
         color: var(--pl-purple) !important; 
@@ -133,21 +133,21 @@ st.markdown("""
         text-transform: uppercase;
     }
 
-    /* TABLES (DATAFRAMES) */
+    /* TABLES */
     div[data-testid="stDataFrame"] {
         background-color: white;
         border-radius: 8px;
         padding: 10px;
     }
-    div[data-testid="stDataFrame"] div[role="grid"] {
-        color: var(--pl-purple);
-    }
     thead tr th {
         background-color: var(--pl-purple) !important;
         color: white !important;
     }
+    div[data-testid="stDataFrame"] div[role="grid"] {
+        color: var(--pl-purple);
+    }
 
-    /* CUSTOM LAYOUT CLASSES */
+    /* ALIGNMENT HELPERS */
     .team-col {
         display: flex;
         flex-direction: column;
@@ -177,7 +177,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ============================================
-# 3. GOD MODE BACKEND (XGBoost + Elo)
+# 3. GOD MODE BACKEND
 # ============================================
 
 class GodModeEngine:
@@ -199,7 +199,6 @@ class GodModeEngine:
                 df = pd.read_csv(io.StringIO(c.decode('latin-1')))
                 df = df.dropna(how='all')
                 
-                # Capture current season teams
                 if s == '2526' or s == '2425': 
                     teams = pd.concat([df['HomeTeam'], df['AwayTeam']]).dropna().unique()
                     self.current_teams = sorted(teams)
@@ -229,7 +228,6 @@ class GodModeEngine:
     def engineer_features(self):
         df = self.master_df.copy()
         
-        # ELO
         df['home_elo'] = 1500.0
         df['away_elo'] = 1500.0
         curr_elo = {t: 1500.0 for t in pd.concat([df['home_team'], df['away_team']]).unique()}
@@ -249,9 +247,8 @@ class GodModeEngine:
             curr_elo[h] += k * (res - e_h)
             curr_elo[a] += k * ((1-res) - (1-e_h))
             
-        self.curr_elo_dict = curr_elo # Store for Leaderboard
+        self.curr_elo_dict = curr_elo 
 
-        # EMA (Form)
         def create_stream(df):
             h = df[['date', 'home_team', 'home_goals', 'home_shots_on_target', 'home_corners']].copy()
             h.columns = ['date', 'team', 'goals', 'sot', 'corners']
@@ -269,7 +266,6 @@ class GodModeEngine:
         df = df.merge(stream[['date', 'team', 'ema_goals', 'ema_sot', 'ema_corners']], 
                       left_on=['date', 'away_team'], right_on=['date', 'team'], how='left').rename(columns={'ema_goals':'a_ema_goals', 'ema_sot':'a_ema_sot', 'ema_corners':'a_ema_corn'}).drop(columns=['team'])
 
-        # DIFFS
         df['Elo_Diff'] = df['home_elo'] - df['away_elo']
         df['EMA_SOT_Diff'] = df['h_ema_sot'] - df['a_ema_sot']
         df['EMA_Corn_Diff'] = df['h_ema_corn'] - df['a_ema_corn']
@@ -291,7 +287,6 @@ class GodModeEngine:
         X_scaled = self.scaler.fit_transform(X)
         weights = np.exp(np.linspace(0, 4, len(X)))
         
-        # TRINITY ENSEMBLE
         lr = LogisticRegression(C=0.05, max_iter=1000)
         rf = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=42)
         xgb_mod = xgb.XGBClassifier(n_estimators=150, max_depth=3, learning_rate=0.05, 
@@ -324,7 +319,6 @@ class GodModeEngine:
         return {'A': probs[0], 'D': probs[1], 'H': probs[2], 'H_Elo': int(h_elo), 'A_Elo': int(a_elo)}
 
     def get_history(self, n=20):
-        # Validation on last N matches in dataset
         recent = self.master_df.tail(n).copy()
         X = recent[self.features]
         X_scaled = self.scaler.transform(X)
@@ -353,7 +347,7 @@ class GodModeEngine:
 # 4. INITIALIZATION
 # ============================================
 @st.cache_resource
-def load_pl_v5_theme(): # RENAMED AGAIN TO FORCE REFRESH
+def load_engine_ultimate_reset_v99(): # UNIQUE NAME TO FORCE RESET
     eng = GodModeEngine()
     if eng.load_data():
         eng.engineer_features()
@@ -361,7 +355,7 @@ def load_pl_v5_theme(): # RENAMED AGAIN TO FORCE REFRESH
         return eng
     return None
 
-engine = load_pl_v5_theme()
+engine = load_engine_ultimate_reset_v99()
 if not engine: st.stop()
 
 # ============================================
@@ -379,9 +373,11 @@ st.markdown("""
 # SIDEBAR NAV
 with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg", width=150)
+    st.markdown("### NAVIGATION")
     page = st.radio("MENU", ["Match Centre", "Standings (Elo)", "History"], label_visibility="collapsed")
     st.markdown("---")
-    st.caption("Ver: 5.0 - PL Theme")
+    st.markdown("**v6.0 - LIVE**")
+    st.caption("Status: God Mode Active")
 
 current_teams = engine.current_teams
 
