@@ -353,7 +353,7 @@ class GodModeEngine:
 # 4. INITIALIZATION
 # ============================================
 @st.cache_resource
-def load_pl_backend_final():
+def load_pl_v5_theme(): # RENAMED AGAIN TO FORCE REFRESH
     eng = GodModeEngine()
     if eng.load_data():
         eng.engineer_features()
@@ -361,7 +361,7 @@ def load_pl_backend_final():
         return eng
     return None
 
-engine = load_pl_backend_final()
+engine = load_pl_v5_theme()
 if not engine: st.stop()
 
 # ============================================
@@ -381,7 +381,7 @@ with st.sidebar:
     st.image("https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg", width=150)
     page = st.radio("MENU", ["Match Centre", "Standings (Elo)", "History"], label_visibility="collapsed")
     st.markdown("---")
-    st.caption("v3.0 - God Mode Backend")
+    st.caption("Ver: 5.0 - PL Theme")
 
 current_teams = engine.current_teams
 
