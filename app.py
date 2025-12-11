@@ -20,34 +20,34 @@ st.set_page_config(
 )
 
 # ============================================
-# 2. LOGO DATABASE
+# 2. LOGO DATABASE (SOURCE: FOTMOB CDN)
 # ============================================
 TEAM_LOGOS = {
-    "Arsenal": "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/1200px-Arsenal_FC.svg.png",
-    "Aston Villa": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/Aston_Villa_logo.svg/1200px-Aston_Villa_logo.svg.png", 
-    "Bournemouth": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/AFC_Bournemouth_%282013%29.svg/1200px-AFC_Bournemouth_%282013%29.svg.png",
-    "Brentford": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2a/Brentford_FC_crest.svg/1200px-Brentford_FC_crest.svg.png",
-    "Brighton": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Brighton_%26_Hove_Albion_logo.svg/1200px-Brighton_%26_Hove_Albion_logo.svg.png",
-    "Burnley": "https://upload.wikimedia.org/wikipedia/en/thumb/6/62/Burnley_F.C._Logo.svg/1200px-Burnley_F.C._Logo.svg.png",
-    "Chelsea": "https://upload.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/1200px-Chelsea_FC.svg.png",
-    "Crystal Palace": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a2/Crystal_Palace_FC_logo_%282022%29.svg/1200px-Crystal_Palace_FC_logo_%282022%29.svg.png",
-    "Everton": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7c/Everton_FC_logo.svg/1200px-Everton_FC_logo.svg.png",
-    "Fulham": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Fulham_FC_%28shield%29.svg/1200px-Fulham_FC_%28shield%29.svg.png",
-    "Ipswich": "https://upload.wikimedia.org/wikipedia/en/thumb/4/43/Ipswich_Town.svg/1200px-Ipswich_Town.svg.png",
-    "Leeds": "https://upload.wikimedia.org/wikipedia/en/thumb/5/54/Leeds_United_F.C._logo.svg/1200px-Leeds_United_F.C._logo.svg.png",
-    "Leicester": "https://upload.wikimedia.org/wikipedia/en/thumb/2/2d/Leicester_City_crest.svg/1200px-Leicester_City_crest.svg.png",
-    "Liverpool": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/1200px-Liverpool_FC.svg.png",
-    "Luton": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9d/Luton_Town_logo.svg/1200px-Luton_Town_logo.svg.png",
-    "Man City": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/1200px-Manchester_City_FC_badge.svg.png",
-    "Man United": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7a/Manchester_United_FC_crest.svg/1200px-Manchester_United_FC_crest.svg.png",
-    "Newcastle": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Newcastle_United_Logo.svg/1200px-Newcastle_United_Logo.svg.png",
-    "Nott'm Forest": "https://upload.wikimedia.org/wikipedia/en/thumb/e/e5/Nottingham_Forest_F.C._logo.svg/1200px-Nottingham_Forest_F.C._logo.svg.png",
-    "Sheffield United": "https://upload.wikimedia.org/wikipedia/en/thumb/9/9c/Sheffield_United_FC_logo.svg/1200px-Sheffield_United_FC_logo.svg.png",
-    "Southampton": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c9/FC_Southampton.svg/1200px-FC_Southampton.svg.png",
-    "Sunderland": "https://upload.wikimedia.org/wikipedia/en/thumb/7/77/Logo_Sunderland.svg/1200px-Logo_Sunderland.svg.png",
-    "Tottenham": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/1200px-Tottenham_Hotspur.svg.png",
-    "West Ham": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/West_Ham_United_FC_logo.svg/1200px-West_Ham_United_FC_logo.svg.png",
-    "Wolves": "https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/Wolverhampton_Wanderers.svg/1200px-Wolverhampton_Wanderers.svg.png"
+    "Arsenal": "https://images.fotmob.com/image_resources/logo/teamlogo/9825.png",
+    "Aston Villa": "https://images.fotmob.com/image_resources/logo/teamlogo/10252.png",
+    "Bournemouth": "https://images.fotmob.com/image_resources/logo/teamlogo/8678.png",
+    "Brentford": "https://images.fotmob.com/image_resources/logo/teamlogo/9937.png",
+    "Brighton": "https://images.fotmob.com/image_resources/logo/teamlogo/10204.png",
+    "Burnley": "https://images.fotmob.com/image_resources/logo/teamlogo/8191.png",
+    "Chelsea": "https://images.fotmob.com/image_resources/logo/teamlogo/8455.png",
+    "Crystal Palace": "https://images.fotmob.com/image_resources/logo/teamlogo/9826.png",
+    "Everton": "https://images.fotmob.com/image_resources/logo/teamlogo/8668.png",
+    "Fulham": "https://images.fotmob.com/image_resources/logo/teamlogo/9879.png",
+    "Ipswich": "https://images.fotmob.com/image_resources/logo/teamlogo/9850.png",
+    "Leeds": "https://images.fotmob.com/image_resources/logo/teamlogo/8463.png",
+    "Leicester": "https://images.fotmob.com/image_resources/logo/teamlogo/8197.png",
+    "Liverpool": "https://images.fotmob.com/image_resources/logo/teamlogo/8650.png",
+    "Luton": "https://images.fotmob.com/image_resources/logo/teamlogo/8346.png",
+    "Man City": "https://images.fotmob.com/image_resources/logo/teamlogo/8456.png",
+    "Man United": "https://images.fotmob.com/image_resources/logo/teamlogo/10260.png",
+    "Newcastle": "https://images.fotmob.com/image_resources/logo/teamlogo/10261.png",
+    "Nott'm Forest": "https://images.fotmob.com/image_resources/logo/teamlogo/10203.png",
+    "Sheffield United": "https://images.fotmob.com/image_resources/logo/teamlogo/8657.png",
+    "Southampton": "https://images.fotmob.com/image_resources/logo/teamlogo/8466.png",
+    "Sunderland": "https://images.fotmob.com/image_resources/logo/teamlogo/8472.png",
+    "Tottenham": "https://images.fotmob.com/image_resources/logo/teamlogo/8586.png",
+    "West Ham": "https://images.fotmob.com/image_resources/logo/teamlogo/8654.png",
+    "Wolves": "https://images.fotmob.com/image_resources/logo/teamlogo/8602.png"
 }
 
 def get_logo(team_name):
@@ -455,6 +455,7 @@ with tab3:
         return ['background-color: #004d29' if v == '✔' else 'background-color: #4d0019' if v == '✖' else '' for v in s]
 
     st.dataframe(history_df.style.apply(highlight_correct, subset=['Correct']), use_container_width=True)
+
 
 
 
