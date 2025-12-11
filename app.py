@@ -216,7 +216,8 @@ class GodModeEngine:
         weights = np.exp(np.linspace(0, 4, len(X)))
         
         # TRINITY ENSEMBLE
-        lr = LogisticRegression(multi_class='multinomial', C=0.05, max_iter=1000)
+        # Fixed: Removed deprecated 'multi_class' parameter
+        lr = LogisticRegression(C=0.05, max_iter=1000) 
         rf = RandomForestClassifier(n_estimators=200, max_depth=5, random_state=42)
         xgb_mod = xgb.XGBClassifier(n_estimators=150, max_depth=3, learning_rate=0.05, 
                                     objective='multi:softmax', num_class=3, random_state=42)
