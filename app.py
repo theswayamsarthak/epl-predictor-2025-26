@@ -397,7 +397,7 @@ with st.sidebar:
 with st.sidebar:
     if st.button("🔄 Force data refresh"):
         st.cache_resource.clear()
-        st.experimental_rerun()
+        st.rerun()
 
 
 current_teams = engine.current_teams
@@ -499,4 +499,5 @@ elif page == "History":
         return ['background-color: #00ff85; color: #38003c' if v == '✅' else 'background-color: #e90052; color: white' if v == '❌' else '' for v in s]
 
     st.dataframe(hist_df.style.apply(highlight, subset=['Status']), use_container_width=True)
+
 
