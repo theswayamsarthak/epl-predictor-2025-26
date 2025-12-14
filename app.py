@@ -362,8 +362,10 @@ class GodModeEngine:
 # ============================================
 # 4. INITIALIZATION
 # ============================================
+from datetime import date
+
 @st.cache_resource
-def load_pl_v6_safe_dates(): # NEW NAME
+def load_pl_v6_safe_dates(version):
     eng = GodModeEngine()
     if eng.load_data():
         eng.engineer_features()
@@ -371,7 +373,7 @@ def load_pl_v6_safe_dates(): # NEW NAME
         return eng
     return None
 
-engine = load_pl_v6_safe_dates()
+engine = load_pl_v6_safe_dates(version=date.today().isoformat())
 if not engine: st.stop()
 
 # ============================================
@@ -392,6 +394,11 @@ with st.sidebar:
     page = st.radio("MENU", ["Match Centre", "Standings (Elo)", "History"], label_visibility="collapsed")
     st.markdown("---")
     st.caption("Ver: 6.0 - Robust")
+with st.sidebar:
+    if st.button("🔄 Force data refresh"):
+        st.cache_resource.clear()
+        st.experimental_rerun()
+
 
 current_teams = engine.current_teams
 
@@ -492,3 +499,4 @@ elif page == "History":
         return ['background-color: #00ff85; color: #38003c' if v == '✅' else 'background-color: #e90052; color: white' if v == '❌' else '' for v in s]
 
     st.dataframe(hist_df.style.apply(highlight, subset=['Status']), use_container_width=True)
+
